@@ -1,0 +1,24 @@
+{
+    "name": "yuriiik/build-meta",
+    "description": "Metadata parser for IPA and APK builds.",
+    "type": "library",
+    "require": {
+        "php": ">=7.0",
+        "alchemy/zippy": "0.4.8",
+        "rodneyrehm/plist": "^2.0.2",
+        "tufanbarisyildirim/php-apk-parser": "^2.0.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yurii Kupratsevych",
+            "email": "kupratsevich@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "BuildMeta\\": "src/BuildMeta/"
+        }
+    }
+}
