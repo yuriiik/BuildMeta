@@ -11,25 +11,32 @@ use ApkParser\Parser as ApkParser;
  */
 class BuildMeta
 {  
+  public $buildType;
+  public $iconOutputPath;
+  public $tmpFolderPath;
+
   public $name;
   public $version;
   public $build;
   public $bundleId;
   public $minOS;  
   
-  function __construct(string $buildPath, string $iconOutputPath = null, string $tmpFolderPath = null) {
+  function __construct(string $buildPath) {
     $this->buildPath = $buildPath;
-    $this->iconOutputPath = $iconOutputPath;
-    $this->tmpFolderPath = $tmpFolderPath;
   }
 
   function parse() {
     $this->validateArguments();
     try {
-      if ($this->buildExt() === BuildMeta::IPA_EXT) {
-        $this->parseIpa();
-      } elseif ($this->buildExt() === BuildMeta::APK_EXT) {
-        $this->parseApk();
+      switch ($this->buildExt()) {
+        case BuildMeta::IPA_EXT:
+          $this->parseIpa();
+          break;        
+        case BuildMeta::APK_EXT:
+          $this->parseApk();
+          break;        
+        default:
+          break;
       }
     } catch (\Error $e) {
       throw $e;
@@ -74,13 +81,16 @@ class BuildMeta
   private const APK_EXT = 'apk';
 
   private $buildPath;
-  private $iconOutputPath;
-  private $tmpFolderPath;
   private $outputFolderPath;
   private $iconName;
 
   private function buildExt() {
-    return strtolower(pathinfo($this->buildPath, PATHINFO_EXTENSION));
+    if (isset($this->buildType)) {
+      return strtolower($this->buildType);
+    } else {
+      return strtolower(pathinfo($this->buildPath, PATHINFO_EXTENSION));
+    }
+    
   }
 
   private function validateArguments() {
@@ -92,7 +102,7 @@ class BuildMeta
     $allowedExts = [BuildMeta::IPA_EXT, BuildMeta::APK_EXT];
     $allowedExtsAsString = implode(", ", $allowedExts);    
     if (!in_array($ext, $allowedExts)) {
-      throw new ArgumentError("Wrong build file: {$ext}. Should be one of: {$allowedExtsAsString}.");
+      throw new ArgumentError("Wrong build type: {$ext}. Should be one of: {$allowedExtsAsString}.");
     }
 
     $iconOutputFolderPath = dirname($this->iconOutputPath);
