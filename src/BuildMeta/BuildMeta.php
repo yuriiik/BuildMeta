@@ -88,9 +88,10 @@ class BuildMeta
       throw new ArgumentError("Build file does not exist: {$this->buildPath}");
     }
 
+    $ext = $this->buildExt();
     $allowedExts = [BuildMeta::IPA_EXT, BuildMeta::APK_EXT];
-    $allowedExtsAsString = implode(", ", $allowedExts);
-    if (!in_array($this->buildExt(), $allowedExts)) {
+    $allowedExtsAsString = implode(", ", $allowedExts);    
+    if (!in_array($ext, $allowedExts)) {
       throw new ArgumentError("Wrong build file: {$ext}. Should be one of: {$allowedExtsAsString}.");
     }
 
