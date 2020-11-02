@@ -3,7 +3,6 @@
 namespace BuildMeta;
 
 use BuildMeta\Error\{ParseError, ArgumentError};
-use Alchemy\Zippy\Zippy;
 use CFPropertyList\CFPropertyList;
 use ApkParser\Parser as ApkParser;
 
@@ -109,6 +108,41 @@ class BuildMeta
     $this->recursiveRmdir($this->outputFolderPath);
   }
 
+  private function unzipResultToString($result) {
+    switch ($result) {
+      case \ZipArchive::ER_EXISTS:
+        return "File already exists.";
+        break;
+      case \ZipArchive::ER_INCONS:
+        return "Zip archive inconsistent.";
+        break;
+      case \ZipArchive::ER_INVAL:
+        return "Invalid argument.";
+        break;
+      case \ZipArchive::ER_MEMORY:
+        return "Malloc failure.";
+        break;
+      case \ZipArchive::ER_NOENT:
+        return "No such file.";
+        break;
+      case \ZipArchive::ER_NOZIP:
+        return "Not a zip archive.";
+        break;
+      case \ZipArchive::ER_OPEN:
+        return "Can't open file.";
+        break;
+      case \ZipArchive::ER_READ:
+        return "Read error.";
+        break;
+      case \ZipArchive::ER_SEEK:
+        return "Seek error.";
+        break;      
+      default:
+        return "Unknown error.";
+        break;
+    }
+  }
+
   private function unzipIpa() {
     $outputFolderPath = $this->getOutputFolderPath();
     $this->outputFolderPath = $outputFolderPath;
@@ -117,12 +151,15 @@ class BuildMeta
     $zipPath = $this->joinPaths($outputFolderPath, "{$fileName}.zip");
     copy($this->buildPath, $zipPath);
 
-    try {
-      Zippy::load()
-      ->open($zipPath)
-      ->extract($outputFolderPath);
-    } catch (\Throwable $t) {
-      throw new ParseError("Failed to unzip file: {$zipPath}. Error: {$t->getMessage()}");
+    $zip = new \ZipArchive;
+    $res = $zip->open($zipPath);
+
+    if ($res === TRUE) {
+      $zip->extractTo($outputFolderPath);
+      $zip->close();
+    } else {
+      $error = $this->unzipResultToString($res);
+      throw new ParseError("Failed to unzip file: {$zipPath}. Error: {$error}");
     }
 
     $payloadFolderPath = $this->joinPaths($outputFolderPath, "Payload");

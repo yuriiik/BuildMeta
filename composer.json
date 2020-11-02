@@ -4,7 +4,6 @@
     "type": "library",
     "require": {
         "php": ">=7.0",
-        "alchemy/zippy": "0.4.8",
         "rodneyrehm/plist": "^2.0.2",
         "tufanbarisyildirim/php-apk-parser": "^2.0.2"
     },
