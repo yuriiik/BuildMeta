@@ -66,10 +66,11 @@ class BuildMeta
       $appIconResourceKey = $apk->getManifest()->getApplication()->getIcon();
       $appIconResource = $apk->getResources($appIconResourceKey)[0] ?? null;
       if (isset($appIconResource)) {
-        $stream = stream_get_contents($apk->getStream($appIconResource));
-        $imageResource = imagecreatefromstring($stream);
-        imagepng($imageResource, $this->iconOutputPath);
-        imagedestroy($imageResource);
+        $imgString = stream_get_contents($apk->getStream($appIconResource));
+        $img = imagecreatefromstring($imgString);
+        imagesavealpha($img, true);
+        imagepng($img, $this->iconOutputPath);
+        imagedestroy($img);
       }
     } catch (\Throwable $t) {
       throw new ParseError("Failed to parse APK: {$this->buildPath}. Error: {$t->getMessage()}");
