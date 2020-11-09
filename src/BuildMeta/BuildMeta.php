@@ -46,6 +46,14 @@ class BuildMeta
     }
   }
 
+  private const IPA_DEFAULT_ICON_NAME = 'AppIcon';
+  private const IPA_EXT = 'ipa';
+  private const APK_EXT = 'apk';
+
+  private $buildPath;
+  private $outputFolderPath;
+  private $iconName;
+
   private function parseIpa() {
     $appFolderPath = $this->unzipIpa();
     $this->parseInfoPlist($appFolderPath);
@@ -73,18 +81,10 @@ class BuildMeta
         imagepng($img, $this->iconOutputPath);
         imagedestroy($img);
       }
-    } catch (\Throwable $t) {
-      throw new ParseError("Failed to parse APK: {$this->buildPath}. Error: {$t->getMessage()}");
+    } catch (\Exception $e) {
+      throw new ParseError("Failed to parse APK: {$this->buildPath}. Error: {$e->getMessage()}");
     }
   }
-
-  private const IPA_DEFAULT_ICON_NAME = 'AppIcon';
-  private const IPA_EXT = 'ipa';
-  private const APK_EXT = 'apk';
-
-  private $buildPath;
-  private $outputFolderPath;
-  private $iconName;
 
   private function buildExt() {
     if (isset($this->buildType)) {
@@ -195,8 +195,8 @@ class BuildMeta
     try {
       $plist = new CFPropertyList($infoPlistPath, CFPropertyList::FORMAT_AUTO);
       $info = $plist->toArray();
-    } catch (\Throwable $t) {
-      throw new ParseError("Failed to read Info.plist: {$infoPlistPath}. Error: {$t->getMessage()}");
+    } catch (\Exception $e) {
+      throw new ParseError("Failed to read Info.plist: {$infoPlistPath}. Error: {$e->getMessage()}");
     }
 
     $this->name = $info["CFBundleDisplayName"] ?? null;
@@ -210,8 +210,8 @@ class BuildMeta
   private function convertCgBIToPNG($source, $dest) {
     try {
       CgBIParser::fix($source, $dest);
-    } catch (\Throwable $t) {
-      throw new ParseError("Failed to convert CgBI PNG to regular PNG: {$t->getMessage()}");
+    } catch (\Exception $e) {
+      throw new ParseError("Failed to convert CgBI PNG to regular PNG: {$e->getMessage()}");
     }
   }
 
