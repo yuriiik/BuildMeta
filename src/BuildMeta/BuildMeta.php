@@ -5,6 +5,7 @@ namespace BuildMeta;
 use BuildMeta\Error\{ParseError, ArgumentError};
 use CFPropertyList\CFPropertyList;
 use ApkParser\Parser as ApkParser;
+use IosPngParser\Parser as CgBIParser;
 
 /**
  * 
@@ -206,6 +207,14 @@ class BuildMeta
     $this->iconName = $info["CFBundleIcons"]["CFBundlePrimaryIcon"]["CFBundleIconName"] ?? BuildMeta::IPA_DEFAULT_ICON_NAME;
   }
 
+  private function convertCgBIToPNG($source, $dest) {
+    try {
+      CgBIParser::fix($source, $dest);
+    } catch (\Throwable $t) {
+      throw new ParseError("Failed to convert CgBI PNG to regular PNG: {$t->getMessage()}");
+    }
+  }
+
   private function parseAppIcon($appFolderPath) {
     $appIconPaths = glob($this->joinPaths($appFolderPath, "{$this->iconName}*.png"));
     usort($appIconPaths, function (string $pathA, string $pathB) {
@@ -214,7 +223,7 @@ class BuildMeta
 
     if (isset($this->iconOutputPath) && !empty($appIconPaths)) {
       $appIconPath = end($appIconPaths);
-      copy($appIconPath, $this->iconOutputPath);
+      $this->convertCgBIToPNG($appIconPath, $this->iconOutputPath);
     }
   }
 
