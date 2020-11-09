@@ -5,7 +5,8 @@
     "require": {
         "php": ">=7.0",
         "rodneyrehm/plist": "^2.0.2",
-        "tufanbarisyildirim/php-apk-parser": "^2.0.2"
+        "tufanbarisyildirim/php-apk-parser": "^2.0.2",
+        "abbotton/ios-png-parser": "dev-master"
     },
     "license": "MIT",
     "authors": [
