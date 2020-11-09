@@ -2,7 +2,7 @@
 
 namespace BuildMeta;
 
-use BuildMeta\Error\{ParseError, ArgumentError};
+use BuildMeta\Exception\{ParseException, ArgumentException};
 use CFPropertyList\CFPropertyList;
 use ApkParser\Parser as ApkParser;
 use IosPngParser\Parser as CgBIParser;
@@ -82,7 +82,7 @@ class BuildMeta
         imagedestroy($img);
       }
     } catch (\Exception $e) {
-      throw new ParseError("Failed to parse APK: {$this->buildPath}. Error: {$e->getMessage()}");
+      throw new ParseException("Failed to parse APK: {$this->buildPath}. Error: {$e->getMessage()}");
     }
   }
 
@@ -97,23 +97,23 @@ class BuildMeta
 
   private function validateArguments() {
     if (!file_exists($this->buildPath)) {
-      throw new ArgumentError("Build file does not exist: {$this->buildPath}");
+      throw new ArgumentException("Build file does not exist: {$this->buildPath}");
     }
 
     $ext = $this->buildExt();
     $allowedExts = [BuildMeta::IPA_EXT, BuildMeta::APK_EXT];
     $allowedExtsAsString = implode(", ", $allowedExts);    
     if (!in_array($ext, $allowedExts)) {
-      throw new ArgumentError("Wrong build type: {$ext}. Should be one of: {$allowedExtsAsString}.");
+      throw new ArgumentException("Wrong build type: {$ext}. Should be one of: {$allowedExtsAsString}.");
     }
 
     $iconOutputFolderPath = dirname($this->iconOutputPath);
     if (isset($this->iconOutputPath) && !file_exists($iconOutputFolderPath)) {
-      throw new ArgumentError("Icon output folder does not exist: {$iconOutputFolderPath}");
+      throw new ArgumentException("Icon output folder does not exist: {$iconOutputFolderPath}");
     }
 
     if (isset($this->tmpFolderPath) && !file_exists($this->tmpFolderPath)) {
-      throw new ArgumentError("Temp folder does not exist: {$this->tmpFolderPath}");
+      throw new ArgumentException("Temp folder does not exist: {$this->tmpFolderPath}");
     }
   }
 
@@ -172,7 +172,7 @@ class BuildMeta
       $zip->close();
     } else {
       $error = $this->unzipResultToString($res);
-      throw new ParseError("Failed to unzip file: {$zipPath}. Error: {$error}");
+      throw new ParseException("Failed to unzip file: {$zipPath}. Error: {$error}");
     }
 
     $payloadFolderPath = $this->joinPaths($outputFolderPath, "Payload");
@@ -181,7 +181,7 @@ class BuildMeta
     if (isset($appFolderPath)) {
       return $appFolderPath;  
     } else {
-      throw new ParseError("App folder not found at location: {$appFolderPath}");
+      throw new ParseException("App folder not found at location: {$appFolderPath}");
     }
   }
 
@@ -189,14 +189,14 @@ class BuildMeta
     $infoPlistPath = $this->joinPaths($appFolderPath, "Info.plist");
     
     if (!file_exists($infoPlistPath)) {
-      throw new ParseError("Info.plist not found at location: {$infoPlistPath}");   
+      throw new ParseException("Info.plist not found at location: {$infoPlistPath}");   
     }
     
     try {
       $plist = new CFPropertyList($infoPlistPath, CFPropertyList::FORMAT_AUTO);
       $info = $plist->toArray();
     } catch (\Exception $e) {
-      throw new ParseError("Failed to read Info.plist: {$infoPlistPath}. Error: {$e->getMessage()}");
+      throw new ParseException("Failed to read Info.plist: {$infoPlistPath}. Error: {$e->getMessage()}");
     }
 
     $this->name = $info["CFBundleDisplayName"] ?? null;
@@ -211,7 +211,7 @@ class BuildMeta
     try {
       CgBIParser::fix($source, $dest);
     } catch (\Exception $e) {
-      throw new ParseError("Failed to convert CgBI PNG to regular PNG: {$e->getMessage()}");
+      throw new ParseException("Failed to convert CgBI PNG to regular PNG: {$e->getMessage()}");
     }
   }
 
